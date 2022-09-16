@@ -1,0 +1,266 @@
+---
+title: "Sesión 5"
+output:
+  bookdown::html_document2:
+    code_folding: hide 
+    toc: true
+    toc_float: true
+#bibliography: references.bib
+#zotero: true
+---
+
+
+
+<center>
+
+<img src="https://github.com/Estadistica-AnalisisPolitico/Images/raw/main/LogoEAP.png" width="500"/>
+
+</center>
+
+Profesor: <a href="http://www.pucp.edu.pe/profesor/jose-manuel-magallanes/" target="_blank">Dr. José Manuel MAGALLANES REYES, Ph.D.</a> <br>
+
+-   Profesor del Departamento de Ciencias Sociales, Sección de Ciencia Política y Gobierno.
+
+-   [Oficina 105](https://goo.gl/maps/xuGeG6o9di1i1y5m6) - Edificio CISEPA / ECONOMIA / CCSS
+
+-   Telefono: (51) 1 - 6262000 anexo 4302
+
+-   Correo Electrónico: [jmagallanes\@pucp.edu.pe](mailto:jmagallanes@pucp.edu.pe)
+
+<a id='beginning'></a>
+
+------------------------------------------------------------------------
+
+<center> <header><h2>Modelando la Duración</h2>  </header></center>
+------------------------------------------------------------------------
+
+
+
+# Introducción
+
+Veamos estos datos:
+
+```{r}
+knitr::include_url("https://docs.google.com/spreadsheets/d/e/2PACX-1vQSlGaMI8Q8qlXI0Bp3m7BQcEh8ZLzaP7RymVtRYkg3ah1sZVlCi6-HmeKCic1RjfuH3gL_wrbMms88/pubhtml")
+```
+
+Veamos cómo lo ha traido R:
+```{r, eval=TRUE}
+link="https://docs.google.com/spreadsheets/d/e/2PACX-1vQSlGaMI8Q8qlXI0Bp3m7BQcEh8ZLzaP7RymVtRYkg3ah1sZVlCi6-HmeKCic1RjfuH3gL_wrbMms88/pub?gid=1573532387&single=true&output=csv"
+carcel=read.csv(link, stringsAsFactors = T)
+str(carcel)
+```
+
+Estos datos nos dan información sobre ex convictos y el tiempo que demoran en volver a delinquir. Hagamos ajustes según la metadata:
+
+```{r}
+carcel[,c(2,3,5,6,7,8)]=lapply(carcel[,c(2,3,5,6,7,8)], as.factor)
+carcel$nivelEduca=as.ordered(carcel$nivelEduca)
+str(carcel)
+```
+
+El propósito de este trabajo es entender por qué los presos dejados en libertad vuelven a delinquir y retornan a la carcel. 
+
+Revisando la metadata, tenemos dos variables que pueden ser usadas como dependiente:
+
+* **semanasLibre**
+* **fueArrestado**
+
+Exploremos ambas:
+
+```{r}
+summary(carcel$semanasLibre)
+```
+
+y...
+
+```{r}
+table(carcel$fueArrestado)
+```
+
+
+* Si nos interesa el efecto de _apoyo financiero_, _nivel educativo_ y _encarcelamientos previos_; podríamos plantearnos estas hipotesis:
+
+  - $H1_1$: El tiempo que permanece en libertad un reo hasta que vuelve a la carcel está afectado de manera directa si tuvo financiamiento.
+  - $H1_2$: El tiempo que permanece en libertad un reo hasta que vuelve a la carcel está afectado de manera directa por su nivel educativo.
+  - $H1_3$: El tiempo que permanece en libertad un reo hasta que vuelve a la carcel está afectado de manera inversa por sus encarcelamientos previos.
+
+A partir de ello, podríamos plantearnos este modelo Gaussiano para testear las tres hipótesis en simultáneo:
+
+```{r}
+#
+h1=formula(semanasLibre~tuvoApoyoDinero+nivelEduca+vecesEnCarcel)
+#
+rGauss=lm(h1,data=carcel)
+#
+summary(rGauss)
+```
+
+La regresión acepta la $H1_1$ con significancia de 0.1, la $H1_3$  con significancia de 0.05, pero rechazaríamos la $H1_2$.
+
+Nota que la variable ordinal viene con unas letras L-Q, etc. Esto informa si el efecto de la ordinal es lineal, cuadrático, cúbico, etc. Esto no ocurre si el predictor fuera nominal:
+
+```{r}
+# efecto nominal
+rGauss=lm(h1,data=carcel,contrasts=list(nivelEduca="contr.treatment"))
+#
+summary(rGauss)
+```
+
+La diferencia es que en esta ocasión cada nivel de la ordinal (ahora nominal) se compara con el nivel más bajo: _si hubiera_ salido significativa esta variable, el NIVEL EDUCATIVO "2" afectaria a la dependiente en -3.7 en comparacion con el nivel "1", y el nivel educativo "3" afectaria a la dependiente en -3.4 en comparación con el nivel "1", etc..
+
+Otra aparente alternativa, si quisieramos usar regresión logística binaria podría ser usar la variable "fue arrestado" como dependiente:
+
+```{r}
+#
+h2=formula(fueArrestado~tuvoApoyoDinero+nivelEduca+vecesEnCarcel)
+#
+rLogit=glm(h2,data=carcel, family = binomial,contrasts = list(nivelEduca = "contr.treatment"))
+#
+summary(rLogit)
+```
+
+
+La regresión acepta la $H1_1$ y la $H1_3$ con significancia de 0.05, pero rechazaríamos la  $H1_2$.
+
+¿Qué problema no estamos advirtiendo?
+
+1. Que la duración es un evento condicionado a ser arrestado, ambas son un todo. Algo dura hasta que algo sucede.
+2. Que el hecho de ser arrestado es un evento, NO una característica, y, lo que es más, el NO ser arrestado es algo que puede variar en el tiempo, sólo que la investigación acabó y el liberado aun seguía libre.
+
+En situaciones que combinan duración y observación de eventos, debemos usar el *EHA* o **Análisis de Eventos Históricos**. Esta técnica funciona de tal manera que puede lidiar con el hecho de _no darse_ el evento, en este caso, no ser arrestado: esto representa un caso censurado.
+
+
+# Analizando Eventos Históricos
+
+El primer paso para usar EHA, es indicarle a R que trate a la data de esa manera:
+
+* Creación del objeto _survival_:
+```{r, eval=TRUE}
+library(survival)
+# note que necesito el factor como numérico
+carcel$survival=with(carcel,Surv(time = semanasLibre,event =  as.numeric(fueArrestado)))
+# que es:
+carcel$survival
+```
+
+Como ves, la columna creada tiene valores con un **+**, lo que indica que están censurados.
+
+## Análisis Kaplan-Meier (KM)
+
+KM es el procedimiento descriptivo básico que se utiliza para ver la dinámica de sobrevivencia. Veamos el comportamiento genérico de permanecer libre:
+
+```{r, eval=TRUE}
+library(ggplot2)
+library(ggfortify)
+KM.generico = survfit(survival ~ 1, data = carcel)
+
+###
+
+ejeX='SEMANAS\n curva cae cuando alguien es arrestado'
+ejeY='Probabilidad \nPERMANECER LIBRE)'
+titulo="Curva de Sobrevivencia (permanecer libre)"
+autoplot(KM.generico,xlab=ejeX,ylab=ejeY, main = titulo,conf.int = F)
+```
+
+La gráfica anterior nos da una idea de cómo se comporta esta población; por ejemplo, la gráfica nos dice que si pasan 40 semanas, la probabilidad de volver está cerca al 80%. 
+
+El análisis KM es más interesante para ver una comparación:
+
+```{r, eval=TRUE}
+KM_H1=formula(survival ~ tuvoApoyoDinero)
+
+KM.fondos = survfit(KM_H1, data = carcel)
+
+###
+ejeX='SEMANAS\n curva cae cuando alguien es arrestado'
+ejeY='Prob(PERMANECER LIBRE)'
+titulo="Curva de Sobrevivencia (permanecer libre)"
+autoplot(KM.fondos,xlab=ejeX,ylab=ejeY, main = titulo,conf.int = F)
+```
+
+La posición de las curvas nos hace pensar que le cuesta más a los que no tuvieron fondos permanecer libres. Para evitar afirmar tal cosa, podemos hacer la prueba de Mantel-Cox (LogRanK):
+
+```{r, eval=TRUE}
+(LogRank=survdiff(KM_H1, data = carcel))
+```
+
+El _p-valor_ sin redondear es:
+
+```{r}
+1 - pchisq(LogRank$chisq, length(LogRank$n) - 1) 
+```
+
+
+Siendo la H0 de KM: no hay diferencias entre grupos, con el p-valor obtenido la diferencia no es significativa al 0.05 (pero sí al 0.1). Este gráfico aclara por qué:
+
+```{r, eval=TRUE}
+autoplot(KM.fondos,xlab=ejeX,ylab=ejeY, main = titulo,conf.int = T)
+```
+
+De nuevo, como sólo hay dos variables, es dificil saber qué más interviene. De ahí que necesitamos un modelo regresional.
+
+
+
+## Regresión de Cox
+
+Como toda regresión, esta técnica permite utilizar regresores o predictores o covariados, pero no modela la duración sino el _riesgo de que el evento suceda_ (ser re arrestado):
+
+
+
+```{r, eval=TRUE}
+# forzando a nominal: 
+carcel$nivelEduca_N=as.factor(as.numeric(carcel$nivelEduca))
+COX_H1= formula(survival~tuvoApoyoDinero+nivelEduca_N+vecesEnCarcel)
+
+
+rcox1 <- coxph(COX_H1,data=carcel)
+summary(rcox1)
+```
+
+Podemos ver que dar financiamiento y condenas previas son significativos al 0.05, y que nivel educativo no lo es. La primera tiene una relación inversa con el riesgo de ser re arrestado (reducen el riesgo), pero la segunda tiene relación directa. Podríamos leer el segundo bloque con los coeficientes exponenciados para dar una interpretación. Esto es diferente si se trata de una variable categórica o una numérica. 
+
+Así, el riesgo de ser arrestado de alguien con fondos es 33.9% (1-0.660) menor de alguien sin tener fondos . 
+
+```{r}
+ci <- confint(rcox1)
+1-exp(cbind(coef(rcox1), ci))["tuvoApoyoDinero1",]
+```
+
+
+
+
+Por otro lado, cada condena previa aumenta el riesgo de ser re arrestado en 9.07% (1.0907-1).
+
+```{r}
+exp(cbind(coef(rcox1), ci))["vecesEnCarcel",]-1
+```
+
+Podemos verlo gráficamente así:
+
+```{r,message=FALSE, warning=FALSE}
+library(survminer)
+ggforest(rcox1, data = carcel)
+```
+
+Sacamos educación?
+```{r}
+COX_H2= formula(survival~tuvoApoyoDinero+vecesEnCarcel)
+
+rcox2 <- coxph(COX_H2,data=carcel)
+
+
+anova(rcox2,rcox1)
+```
+
+Añadir nivel educativo no es significativo al 0.05, pero sí lo es al 0.1.
+
+ 
+
+
+_____
+<br></br>
+
+[al INICIO](#beginning)
+
+[VOLVER A CONTENIDOS](https://politicaygobiernopucp.github.io/estadistica_anapol2/)
