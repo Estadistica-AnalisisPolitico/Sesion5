@@ -295,3 +295,5 @@ knitr::kable(caption = "Tabla anova para comparar modelos")%>%kableExtra::kable_
 ```
 
 Así, añadir nivel educativo no es significativo al 0.05, pero sí lo es al 0.1. Esto daría espacio para sostener la inclusión de nivel educativo en el modelo.
+
+# References
