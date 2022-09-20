@@ -3520,7 +3520,7 @@ Figure 2.2: Análisis Kaplan-Meier (grupos)
 <pre class="r"><code>LogRank=survdiff(KM_H1, data = carcel)
 LogRank$pvalue</code></pre>
 <pre><code>## [1] 0.05011612</code></pre>
-<p>Siendo la H0 de KM: no hay diferencias entre grupos, con el p-valor obtenido la diferencia no es significativa al 0.05 (pero sí al 0.1). La Figura <a href="#kmcurveConfInt"><strong>??</strong></a> aclara por qué.</p>
+<p>Siendo la H0 de KM: no hay diferencias entre grupos, con el p-valor obtenido la diferencia no es significativa al 0.05 (pero sí al 0.1). La Figura <a href="#fig:kmcurveConfInt">2.3</a> aclara por qué.</p>
 <pre class="r"><code>autoplot(KM.fondos,xlab=ejeX,ylab=ejeY, 
          main = titulo,conf.int = T)+ 
         labs(colour = &quot;Apoyo Financiero?&quot;) + 
@@ -4035,9 +4035,6 @@ NA
 </tbody>
 </table>
 <p>Así, añadir nivel educativo no es significativo al 0.05, pero sí lo es al 0.1. Esto daría espacio para sostener la inclusión de nivel educativo en el modelo.</p>
-<hr />
-<p><br /></p>
-<p><a href="#beginning">al INICIO</a></p>
 </div>
 </div>
 <div class="footnotes footnotes-end-of-document">

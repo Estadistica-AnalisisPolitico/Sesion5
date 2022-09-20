@@ -197,7 +197,7 @@ LogRank$pvalue
 ```
 
 
-Siendo la H0 de KM: no hay diferencias entre grupos, con el p-valor obtenido la diferencia no es significativa al 0.05 (pero sí al 0.1). La Figura \@ref(kmcurveConfInt) aclara por qué.
+Siendo la H0 de KM: no hay diferencias entre grupos, con el p-valor obtenido la diferencia no es significativa al 0.05 (pero sí al 0.1). La Figura \@ref(fig:kmcurveConfInt) aclara por qué.
 
 ```{r kmcurveConfInt, eval=TRUE, fig.cap="Curva de Sobrevivencia (grupos con intervalo de confianza)"}
 autoplot(KM.fondos,xlab=ejeX,ylab=ejeY, 
@@ -299,7 +299,3 @@ Así, añadir nivel educativo no es significativo al 0.05, pero sí lo es al 0.1
  
 
 
-_____
-<br></br>
-
-[al INICIO](#beginning)
