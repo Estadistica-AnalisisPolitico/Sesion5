@@ -129,7 +129,7 @@ Para el caso de los resultados con la Logit tenemos:
 
 -   El tener apoyo financiero disminuye el Log Odds Ratio de ser arrestado con una significancia de 0.05.
 -   El nivel educativo no tendría efecto en el Log Odds Ratio de ser arrestado (probabilidad de efecto cero es mayor al 0.1).
--   El tener encarcelamientos previos disminuye el Log Odds Ratio de ser arrestado con una significancia de 0.01.
+-   El tener encarcelamientos previos aumenta el Log Odds Ratio de ser arrestado con una significancia de 0.01.
 
 Nota que enla Tabla \@ref(tab:h1h2) ambos casos la variable ordinal viene con unas letras L-Q, etc. Esto informa si el efecto de la ordinal es lineal, cuadrático, cúbico, etc.
 
