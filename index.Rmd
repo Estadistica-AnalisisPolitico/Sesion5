@@ -200,6 +200,7 @@ La posición de las curvas nos hace pensar que le cuesta más a los que no tuvie
 
 ```{r, eval=TRUE}
 LogRank=survdiff(KM_H1, data = carcel)
+# ver p-valor
 LogRank$pvalue
 
 ```
