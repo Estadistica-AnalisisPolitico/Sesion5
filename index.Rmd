@@ -58,7 +58,7 @@ Estos datos nos dan información sobre ex convictos y el tiempo que demoran en v
 knitr::include_url("https://docs.google.com/spreadsheets/d/e/2PACX-1vQSlGaMI8Q8qlXI0Bp3m7BQcEh8ZLzaP7RymVtRYkg3ah1sZVlCi6-HmeKCic1RjfuH3gL_wrbMms88/pubhtml")
 ```
 
-Veamos cómo los ha traido R:
+Veámos cómo los ha traído R:
 
 ```{r, eval=TRUE}
 link="https://docs.google.com/spreadsheets/d/e/2PACX-1vQSlGaMI8Q8qlXI0Bp3m7BQcEh8ZLzaP7RymVtRYkg3ah1sZVlCi6-HmeKCic1RjfuH3gL_wrbMms88/pub?gid=1573532387&single=true&output=csv"
@@ -66,7 +66,7 @@ carcel=read.csv(link, stringsAsFactors = T)
 str(carcel)
 ```
 
-A partor de aquí, hagamos ajustes a los **tipos de datos** según la metadata:
+A partir de aquí, hagamos ajustes a los **tipos de datos** según la metadata:
 
 ```{r}
 carcel[,c(2,3,5,6,7,8)]=lapply(carcel[,c(2,3,5,6,7,8)], as.factor)
@@ -74,7 +74,7 @@ carcel$nivelEduca=as.ordered(carcel$nivelEduca)
 str(carcel)
 ```
 
-El propósito de este trabajo es entender qué factores afectan la reincidencia de los los presos dejados en libertad. Revisando la metadata, tenemos dos variables que pueden ser usadas como dependiente. Exploremos ambas:
+El propósito de este trabajo es entender qué factores afectan la reincidencia de los presos dejados en libertad. Revisando la metadata, tenemos dos variables que pueden ser usadas como dependiente. Exploremos ambas:
 
 -   **semanasLibre**
 
@@ -90,11 +90,11 @@ table(carcel$fueArrestado)
 
 Con la data disponible podemos proponer estas hipotesis:
 
-> H1: El tiempo que permanece en libertad un reo hasta que vuelve a la carcel está afectado si tuvo financiamiento,por su nivel educativo, y por sus encarcelamientos previos.
+> H1: El tiempo que permanece en libertad un exreo hasta que vuelve a la carcel está afectado si tuvo financiamiento,por su nivel educativo, y por sus encarcelamientos previos.
 
 y...
 
-> H2: El que un reo vuelva a la carcel está afectado si tuvo financiamiento,por su nivel educativo, y por sus encarcelamientos previos.
+> H2: El que un ex reo vuelva a la carcel está afectado si tuvo financiamiento,por su nivel educativo, y por sus encarcelamientos previos.
 
 La \@ref(tab:h1h2) nos muestra el resultado de modelar la H1 con una regresión Gaussiana [@magallanes_estadistica-analisispoliticosesion2_2022-1], y la H2 con una regresión logística binaria [@magallanes_estadistica-analisispoliticosesion4_2022]:
 
@@ -131,11 +131,11 @@ Para el caso de los resultados con la Logit tenemos:
 -   El nivel educativo no tendría efecto en el Log Odds Ratio de ser arrestado (probabilidad de efecto cero es mayor al 0.1).
 -   El tener encarcelamientos previos aumenta el Log Odds Ratio de ser arrestado con una significancia de 0.01.
 
-Nota que enla Tabla \@ref(tab:h1h2) ambos casos la variable ordinal viene con unas letras L-Q, etc. Esto informa si el efecto de la ordinal es lineal, cuadrático, cúbico, etc.
+Nota que en la Tabla \@ref(tab:h1h2) ambos casos la variable ordinal viene con unas letras L-Q, etc. Esto informa si el efecto de la ordinal es lineal, cuadrático, cúbico, etc.
 
 ¿Qué problema no estamos advirtiendo?
 
-1.  Que la duración de la libertad está condicionada a ser arrestado, ambas son un todo. Algo dura hasta que algo sucede.
+1.  Que la duración de la libertad está condicionada a ser arrestado, ambas son un todo. Una situación dura hasta que algo sucede y la situación cambia.
 
 2.  Que el hecho de ser arrestado es un evento, NO una característica, y, lo que es más, el NO ser arrestado es algo que puede variar en el tiempo, sólo que la investigación acabó y el liberado aun seguía libre.
 
