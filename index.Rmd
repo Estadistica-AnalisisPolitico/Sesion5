@@ -242,23 +242,23 @@ modelsummary(modelcox,
 
 La Tabla \@ref(tab:coxtable) muestra los coeficientes originales y exponenciados (las razones de riesgo o *hazard ratios*) . Veamos cada uno:
 
--   Se puede inferir que dar financiamiento disminuye el riesgo de ser re arrestado con una significancia del 0.05. La columna a la derecha (los *HRs*) nos da la magnitud promedio de ese riesgo como la distancia absoluta al uno (*1*); en este caso:
+-   Se puede inferir que dar financiamiento disminuye el riesgo de ser re arrestado con una significancia del 0.05. La columna a la derecha (los *HRs*) nos da el promedio de ese efecto en el riesgo como la distancia absoluta al uno (*1*); en este caso:
 
 ```{r}
 (apoyoDinero=abs(1-exp(coef(rcox1)[1])))
 ```
 
-De ahí que usando el hazard ratio, podemos sostener que el riesgo de volver a la cárcel para alguien con apoyo financiero es aproximadamente `r 100*round(apoyoDinero,4)` menor a la de los que no lo tienen.
+De ahí que usando el hazard ratio, podemos sostener que el riesgo de volver a la cárcel para alguien con apoyo financiero es en promedio `r 100*round(apoyoDinero,4)`% menor a la de los que no lo tienen.
 
 -   Se puede inferir que es muy poco probable que el nivel educativo tenga efecto en el riesgo de ser re arrestado.
 
--   Se puede inferir que haber estado previamente en la cárcel aumenta el riesgo de ser re arrestado con una significancia del 0.01. La magnitud promedio de ese riesgo es la distancia absoluta al uno (*1*); en este caso:
+-   Se puede inferir que haber estado previamente en la cárcel aumenta el riesgo de ser re arrestado con una significancia del 0.01. El promedio de ese riesgo es la distancia absoluta al uno (*1*); en este caso:
 
 ```{r}
 (carcelantes=abs(1-exp(coef(rcox1)[6])))
 ```
 
-De ahí que, podemos sostener que el riesgo de volver a la cárcel para alguien con apoyo financiero se multiplica por el factor `r 100*round(carcelantes,4)` cada vez que aumenta en uno los años de encarcelamientos previos[^1].
+De ahí que, podemos sostener que el riesgo de volver a la cárcel para alguien con apoyo financiero es en promedio `r 100*round(carcelantes,4)`% mayor cada vez que aumenta en uno los años de encarcelamientos previos[^1].
 
 [^1]: Como la Tabla \@ref(tab:coxtable) muestra intervalos de confianza la interpretación puede darse utilizando tales valores.
 
